@@ -1,5 +1,6 @@
 mod packet;
-use crate::packet::{Buffer, Header};
+use packet::buffer::Buffer;
+use packet::header::Header;
 use std::fs::File;
 use std::io::Read;
 
