@@ -44,6 +44,44 @@ impl Header {
             is_recursion_available: Header::is_recursion_available(flags),
         }
     }
+
+    pub fn to_buffer(&self, buffer: &mut Buffer) {
+        buffer.write_u16(self.id);
+        buffer.write_u16(self.flags);
+        buffer.write_u16(self.qd_count);
+        buffer.write_u16(self.an_count);
+        buffer.write_u16(self.ns_count);
+        buffer.write_u16(self.ar_count);
+    }
+
+    pub fn for_query() -> Self {
+        let id = 1234;
+        let mut flags: u16 = 0;
+        // query flag
+        flags = flags | 0b10000000_00000000;
+        // recursion desired
+        flags = flags | (1 << 8);
+
+        let is_response: bool = Header::is_response(flags);
+        let is_query: bool = Header::is_query(flags);
+        let is_standard_query: bool = Header::is_standard_query(flags);
+        let is_authorotative_ans: bool = Header::is_authorotative_ans(flags);
+        let is_recursion_available: bool = Header::is_recursion_available(flags);
+
+        Header {
+            id,
+            flags,
+            qd_count: 1,
+            an_count: 0,
+            ns_count: 0,
+            ar_count: 0,
+            is_response,
+            is_query,
+            is_standard_query,
+            is_authorotative_ans,
+            is_recursion_available,
+        }
+    }
     fn is_response(flags: u16) -> bool {
         (flags & (1 << 15)) != 0
     }

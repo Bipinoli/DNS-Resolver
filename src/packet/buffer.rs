@@ -41,4 +41,25 @@ impl Buffer {
         }
         self.cursor = offset as usize;
     }
+    pub fn write_u8(&mut self, data: u8) {
+        if self.cursor + 8 >= BUF_SIZE {
+            panic!("attempted to write outside the buffer");
+        }
+        self.buf[self.cursor] = data;
+        self.cursor += 1;
+    }
+    pub fn write_u16(&mut self, data: u16) {
+        if self.cursor + 16 >= BUF_SIZE {
+            panic!("attempted to write outside the buffer");
+        }
+        self.write_u8((data >> 8) as u8);
+        self.write_u8(data as u8);
+    }
+    pub fn write_u32(&mut self, data: u32) {
+        if self.cursor + 32 >= BUF_SIZE {
+            panic!("attempted to write outside the buffer");
+        }
+        self.write_u16((data >> 16) as u16);
+        self.write_u16(data as u16);
+    }
 }

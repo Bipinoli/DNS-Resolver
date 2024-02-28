@@ -28,6 +28,15 @@ impl ResourceRecord {
         }
     }
 
+    pub fn to_buffer(&self, buffer: &mut Buffer) {
+        self.write_label(buffer);
+        buffer.write_u16(self.rr_type);
+        buffer.write_u16(self.class);
+        buffer.write_u32(self.ttl);
+        buffer.write_u16(self.rd_length);
+        self.write_rdata(buffer);
+    }
+
     fn read_label(buffer: &mut Buffer) -> String {
         // compression scheme allows for message to be represented as:
         // - a sequence of labels ending in a zero octet
@@ -65,11 +74,32 @@ impl ResourceRecord {
         }
     }
 
+    fn write_label(&self, buffer: &mut Buffer) {
+        // TODO: use pointer compression method to save space
+        let splits: Vec<&str> = self.name.split(".").collect();
+        for word in splits {
+            let len = word.len() as u8;
+            buffer.write_u8(len);
+            for c in word.chars() {
+                buffer.write_u8(c as u8);
+            }
+        }
+        buffer.write_u8(0);
+    }
+
     fn read_rdata(rd_length: u16, buffer: &mut Buffer) -> String {
         let mut nums: Vec<String> = Vec::new();
         for _ in 0..rd_length {
             nums.push(format!("{}", buffer.read_u8()));
         }
         nums.join(".")
+    }
+
+    fn write_rdata(&self, buffer: &mut Buffer) {
+        let splits: Vec<&str> = self.rdata.split(".").collect();
+        for word in splits {
+            let num: u8 = word.parse::<u8>().unwrap();
+            buffer.write_u8(num);
+        }
     }
 }

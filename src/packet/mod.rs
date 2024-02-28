@@ -44,4 +44,22 @@ impl Packet {
             additional_records,
         }
     }
+
+    pub fn to_buffer(&self) -> Buffer {
+        let mut buffer = Buffer::new();
+        self.header.to_buffer(&mut buffer);
+        for item in self.questions {
+            item.to_buffer(&mut buffer);
+        }
+        for item in self.answers {
+            item.to_buffer(&mut buffer);
+        }
+        for item in self.authority_records {
+            item.to_buffer(&mut buffer);
+        }
+        for item in self.additional_records {
+            item.to_buffer(&mut buffer);
+        }
+        buffer
+    }
 }

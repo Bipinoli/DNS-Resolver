@@ -2,9 +2,9 @@ use crate::packet::buffer::Buffer;
 
 #[derive(Debug)]
 pub struct Question {
-    qname: String,
-    qtype: u16,
-    qclass: u16,
+    pub qname: String,
+    pub qtype: u16,
+    pub qclass: u16,
 }
 impl Question {
     pub fn from_buffer(buffer: &mut Buffer) -> Self {
@@ -13,6 +13,12 @@ impl Question {
             qtype: buffer.read_u16(),
             qclass: buffer.read_u16(),
         }
+    }
+
+    pub fn to_buffer(&self, buffer: &mut Buffer) {
+        self.write_qname(buffer);
+        buffer.write_u16(self.qtype);
+        buffer.write_u16(self.qclass);
     }
 
     fn read_qname(buffer: &mut Buffer) -> String {
@@ -34,5 +40,17 @@ impl Question {
             }
         }
         qname
+    }
+
+    fn write_qname(&self, buffer: &mut Buffer) {
+        let splits: Vec<&str> = self.qname.split(".").collect();
+        for word in splits {
+            let len = word.len() as u8;
+            buffer.write_u8(len);
+            for c in word.chars() {
+                buffer.write_u8(c as u8);
+            }
+        }
+        buffer.write_u8(0);
     }
 }

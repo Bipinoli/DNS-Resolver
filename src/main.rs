@@ -1,6 +1,7 @@
 mod packet;
+mod resolver;
+
 use packet::buffer::Buffer;
-use packet::header::Header;
 use packet::Packet;
 use std::fs::File;
 use std::io::Read;
