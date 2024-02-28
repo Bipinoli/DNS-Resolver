@@ -21,6 +21,7 @@ pub struct Header {
     pub ar_count: u16,
     // -- convinience fields ..
     pub is_response: bool,
+    pub response_code: ResponseCode,
     pub is_query: bool,
     pub is_standard_query: bool,
     pub is_authorotative_ans: bool,
@@ -38,6 +39,7 @@ impl Header {
             ns_count: buffer.read_u16(),
             ar_count: buffer.read_u16(),
             is_response: Header::is_response(flags),
+            response_code: Header::get_response_code(flags),
             is_query: Header::is_query(flags),
             is_standard_query: Header::is_standard_query(flags),
             is_authorotative_ans: Header::is_authorotative_ans(flags),
@@ -61,6 +63,7 @@ impl Header {
         flags = flags | (1 << 8);
 
         let is_response: bool = Header::is_response(flags);
+        let response_code: ResponseCode = Header::get_response_code(flags);
         let is_query: bool = Header::is_query(flags);
         let is_standard_query: bool = Header::is_standard_query(flags);
         let is_authorotative_ans: bool = Header::is_authorotative_ans(flags);
@@ -74,6 +77,7 @@ impl Header {
             ns_count: 0,
             ar_count: 0,
             is_response,
+            response_code,
             is_query,
             is_standard_query,
             is_authorotative_ans,
@@ -96,9 +100,8 @@ impl Header {
     fn is_recursion_available(flags: u16) -> bool {
         (flags & (1 << 7)) != 0
     }
-
-    pub fn get_response_code(&self) -> ResponseCode {
-        let rcode = 0b1111 & self.flags;
+    fn get_response_code(flags: u16) -> ResponseCode {
+        let rcode = 0b1111 & flags;
         match rcode {
             0 => ResponseCode::NoErr,
             1 => ResponseCode::FormatErr,
