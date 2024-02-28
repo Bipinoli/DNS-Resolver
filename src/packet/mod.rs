@@ -13,7 +13,7 @@ pub struct Packet {
     pub header: Header,
     pub questions: Vec<Question>,
     pub answers: Vec<ResourceRecord>,
-    pub authority_records: Vec<ResourceRecord>,
+    pub nameserver_records: Vec<ResourceRecord>,
     pub additional_records: Vec<ResourceRecord>,
 }
 
@@ -31,21 +31,18 @@ impl Packet {
             answers.push(ResourceRecord::from_buffer(buffer));
         }
         dbg!(&answers);
-        let mut authority_records: Vec<ResourceRecord> = vec![];
-        for _ in 0..header.ar_count {
-            authority_records.push(ResourceRecord::from_buffer(buffer));
+        let mut nameserver_records: Vec<ResourceRecord> = vec![];
+        for _ in 0..header.ns_count {
+            nameserver_records.push(ResourceRecord::from_buffer(buffer));
         }
-        dbg!(&authority_records);
+        dbg!(&nameserver_records);
+        //TODO: implement parsing additional_records
         let mut additional_records: Vec<ResourceRecord> = vec![];
-        for _ in 0..header.ar_count {
-            additional_records.push(ResourceRecord::from_buffer(buffer));
-        }
-        dbg!(&additional_records);
         Packet {
             header,
             questions,
             answers,
-            authority_records,
+            nameserver_records,
             additional_records,
         }
     }
@@ -59,7 +56,7 @@ impl Packet {
         for item in &self.answers {
             item.to_buffer(&mut buffer);
         }
-        for item in &self.authority_records {
+        for item in &self.nameserver_records {
             item.to_buffer(&mut buffer);
         }
         for item in &self.additional_records {

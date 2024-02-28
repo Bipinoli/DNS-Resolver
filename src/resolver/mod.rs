@@ -32,7 +32,7 @@ fn create_request(domain_name: String) -> Packet {
         header,
         questions: vec![question],
         answers: vec![],
-        authority_records: vec![],
+        nameserver_records: vec![],
         additional_records: vec![],
     }
 }
