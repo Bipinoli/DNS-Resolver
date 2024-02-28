@@ -2,14 +2,19 @@
 pub mod buffer;
 pub mod header;
 pub mod question;
+pub mod resource_record;
 use buffer::Buffer;
 use header::Header;
 use question::Question;
+use resource_record::ResourceRecord;
 
 #[derive(Debug)]
 pub struct Packet {
     header: Header,
     questions: Vec<Question>,
+    answers: Vec<ResourceRecord>,
+    authority_records: Vec<ResourceRecord>,
+    additional_records: Vec<ResourceRecord>,
 }
 
 impl Packet {
@@ -19,6 +24,24 @@ impl Packet {
         for _ in 0..header.qd_count {
             questions.push(Question::from_buffer(buffer));
         }
-        Packet { header, questions }
+        let mut answers: Vec<ResourceRecord> = vec![];
+        for _ in 0..header.an_count {
+            answers.push(ResourceRecord::from_buffer(buffer));
+        }
+        let mut authority_records: Vec<ResourceRecord> = vec![];
+        for _ in 0..header.ar_count {
+            authority_records.push(ResourceRecord::from_buffer(buffer));
+        }
+        let mut additional_records: Vec<ResourceRecord> = vec![];
+        for _ in 0..header.ar_count {
+            additional_records.push(ResourceRecord::from_buffer(buffer));
+        }
+        Packet {
+            header,
+            questions,
+            answers,
+            authority_records,
+            additional_records,
+        }
     }
 }
