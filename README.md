@@ -1,5 +1,12 @@
 # DNS resolver
 
-RFC https://datatracker.ietf.org/doc/html/rfc1035
+It is an implementation of a DNS resolution tool similar to dig.
+I have implemented it based on the DNS protocol specified in [RFC 1035](https://datatracker.ietf.org/doc/html/rfc1035).
 
-I read [this](https://github.com/EmilHernvall/dnsguide/tree/master) excellent guide before starting any coding. So, it draws heavy inspiration from there.
+It is by no means complete and is purely made for fun.
+
+Before starting the implementation, I skimmed over [this](https://github.com/EmilHernvall/dnsguide/tree/master) guide.
+Although the original RFC is very readable in understanding the protocol, I recommend going quickly over the guide if you have time.
+
+
+
