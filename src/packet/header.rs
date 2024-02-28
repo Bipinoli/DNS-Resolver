@@ -57,8 +57,6 @@ impl Header {
     pub fn for_query() -> Self {
         let id = 1234;
         let mut flags: u16 = 0;
-        // query flag
-        flags = flags | 0b10000000_00000000;
         // recursion desired
         flags = flags | (1 << 8);
 

@@ -10,11 +10,11 @@ use resource_record::ResourceRecord;
 
 #[derive(Debug)]
 pub struct Packet {
-    header: Header,
-    questions: Vec<Question>,
-    answers: Vec<ResourceRecord>,
-    authority_records: Vec<ResourceRecord>,
-    additional_records: Vec<ResourceRecord>,
+    pub header: Header,
+    pub questions: Vec<Question>,
+    pub answers: Vec<ResourceRecord>,
+    pub authority_records: Vec<ResourceRecord>,
+    pub additional_records: Vec<ResourceRecord>,
 }
 
 impl Packet {
@@ -48,16 +48,16 @@ impl Packet {
     pub fn to_buffer(&self) -> Buffer {
         let mut buffer = Buffer::new();
         self.header.to_buffer(&mut buffer);
-        for item in self.questions {
+        for item in &self.questions {
             item.to_buffer(&mut buffer);
         }
-        for item in self.answers {
+        for item in &self.answers {
             item.to_buffer(&mut buffer);
         }
-        for item in self.authority_records {
+        for item in &self.authority_records {
             item.to_buffer(&mut buffer);
         }
-        for item in self.additional_records {
+        for item in &self.additional_records {
             item.to_buffer(&mut buffer);
         }
         buffer
