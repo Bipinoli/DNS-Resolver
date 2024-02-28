@@ -1,6 +1,7 @@
 mod packet;
 use packet::buffer::Buffer;
 use packet::header::Header;
+use packet::Packet;
 use std::fs::File;
 use std::io::Read;
 
@@ -10,6 +11,6 @@ fn main() {
     file.read(&mut buffer.buf)
         .expect("couldn't read file into the buffer");
 
-    let mut header = Header::from_buffer(&mut buffer);
-    dbg!(&header);
+    let mut packet = Packet::from_buffer(&mut buffer);
+    dbg!(&packet);
 }

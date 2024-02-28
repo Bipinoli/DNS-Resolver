@@ -19,35 +19,48 @@ pub struct Header {
     pub an_count: u16,
     pub ns_count: u16,
     pub ar_count: u16,
+    // -- convinience fields ..
+    pub is_response: bool,
+    pub is_query: bool,
+    pub is_standard_query: bool,
+    pub is_authorotative_ans: bool,
+    pub is_recursion_available: bool,
 }
 impl Header {
     pub fn from_buffer(buffer: &mut Buffer) -> Self {
+        let id = buffer.read_u16();
+        let flags = buffer.read_u16();
         Header {
-            id: buffer.read_u16(),
-            flags: buffer.read_u16(),
+            id,
+            flags,
             qd_count: buffer.read_u16(),
             an_count: buffer.read_u16(),
             ns_count: buffer.read_u16(),
             ar_count: buffer.read_u16(),
+            is_response: Header::is_response(flags),
+            is_query: Header::is_query(flags),
+            is_standard_query: Header::is_standard_query(flags),
+            is_authorotative_ans: Header::is_authorotative_ans(flags),
+            is_recursion_available: Header::is_recursion_available(flags),
         }
     }
-
-    pub fn is_response(&self) -> bool {
-        (self.flags & (1 << 15)) != 0
+    fn is_response(flags: u16) -> bool {
+        (flags & (1 << 15)) != 0
     }
-    pub fn is_query(&self) -> bool {
-        !self.is_response()
+    fn is_query(flags: u16) -> bool {
+        !Header::is_response(flags)
     }
-    pub fn is_standard_query(&self) -> bool {
-        let opcode = (self.flags & (0b1111 << 11)) >> 11;
+    fn is_standard_query(flags: u16) -> bool {
+        let opcode = (flags & (0b1111 << 11)) >> 11;
         opcode == 0
     }
-    pub fn is_authorotative_ans(&self) -> bool {
-        (self.flags & (1 << 10)) != 0
+    fn is_authorotative_ans(flags: u16) -> bool {
+        (flags & (1 << 10)) != 0
     }
-    pub fn is_recursion_available(&self) -> bool {
-        (self.flags & (1 << 7)) != 0
+    fn is_recursion_available(flags: u16) -> bool {
+        (flags & (1 << 7)) != 0
     }
+
     pub fn get_response_code(&self) -> ResponseCode {
         let rcode = 0b1111 & self.flags;
         match rcode {
@@ -60,17 +73,4 @@ impl Header {
             _ => ResponseCode::Unknown,
         }
     }
-}
-
-#[derive(Debug)]
-pub struct Question {
-    qtype: u16,
-    qclass: u16,
-    qname: u16,
-}
-
-#[derive(Debug)]
-pub struct Packet {
-    header: Header,
-    question: Question,
 }
