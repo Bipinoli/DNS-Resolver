@@ -12,7 +12,7 @@ pub fn resolve(domain_name: String) -> Packet {
     let request_packet = create_request(domain_name);
     let buffer = request_packet.to_buffer();
     socket
-        .send_to(&buffer.buf, ("1.1.1.1", 53))
+        .send_to(&buffer.buf, ("192.36.148.17", 53))
         .expect("couldn't send the udp packet to the 1.1.1.1");
     let mut resp_buffer = Buffer::new();
     socket

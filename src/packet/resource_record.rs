@@ -7,7 +7,7 @@ pub struct ResourceRecord {
     pub class: u16,
     pub ttl: u32,
     pub rd_length: u16,
-    pub rdata: String,
+    pub rdata: Vec<String>,
 }
 
 impl ResourceRecord {
@@ -87,19 +87,31 @@ impl ResourceRecord {
         buffer.write_u8(0);
     }
 
-    fn read_rdata(rd_length: u16, buffer: &mut Buffer) -> String {
-        let mut nums: Vec<String> = Vec::new();
-        for _ in 0..rd_length {
-            nums.push(format!("{}", buffer.read_u8()));
+    fn read_rdata(rd_length: u16, buffer: &mut Buffer) -> Vec<String> {
+        // ip address has 4 nums, and there can be multiple ip addresses
+        let mut retval: Vec<String> = Vec::new();
+        let mut left_to_read = rd_length;
+        loop {
+            if left_to_read <= 0 {
+                break;
+            }
+            let mut nums: Vec<String> = Vec::new();
+            for _ in 0..4 {
+                nums.push(format!("{}", buffer.read_u8()));
+            }
+            retval.push(nums.join("."));
+            left_to_read -= 4;
         }
-        nums.join(".")
+        retval
     }
 
     fn write_rdata(&self, buffer: &mut Buffer) {
-        let splits: Vec<&str> = self.rdata.split(".").collect();
-        for word in splits {
-            let num: u8 = word.parse::<u8>().unwrap();
-            buffer.write_u8(num);
+        for rdata in &self.rdata {
+            let splits: Vec<&str> = rdata.split(".").collect();
+            for word in splits {
+                let num: u8 = word.parse::<u8>().unwrap();
+                buffer.write_u8(num);
+            }
         }
     }
 }
