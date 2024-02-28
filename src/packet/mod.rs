@@ -20,22 +20,18 @@ pub struct Packet {
 impl Packet {
     pub fn from_buffer(buffer: &mut Buffer) -> Self {
         let header = Header::from_buffer(buffer);
-        dbg!(&header);
         let mut questions: Vec<Question> = vec![];
         for _ in 0..header.qd_count {
             questions.push(Question::from_buffer(buffer));
         }
-        dbg!(&questions);
         let mut answers: Vec<ResourceRecord> = vec![];
         for _ in 0..header.an_count {
             answers.push(ResourceRecord::from_buffer(buffer));
         }
-        dbg!(&answers);
         let mut nameserver_records: Vec<ResourceRecord> = vec![];
         for _ in 0..header.ns_count {
             nameserver_records.push(ResourceRecord::from_buffer(buffer));
         }
-        dbg!(&nameserver_records);
         //TODO: implement parsing additional_records
         let mut additional_records: Vec<ResourceRecord> = vec![];
         Packet {
