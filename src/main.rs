@@ -8,7 +8,7 @@ use std::fs::File;
 use std::io::Read;
 use std::process::exit;
 
-use crate::resolver::recursive_resolve;
+use crate::resolver::{proxy_resolve, recursive_resolve};
 
 fn main() {
     // let mut file = File::open("dns_res_packet").expect("dns_req_packet couldn't be opened");
@@ -25,6 +25,6 @@ fn main() {
         exit(1);
     }
     let domain_name = args[1].clone();
-    let packet = recursive_resolve(domain_name);
+    let packet = proxy_resolve(domain_name);
     dbg!(&packet);
 }

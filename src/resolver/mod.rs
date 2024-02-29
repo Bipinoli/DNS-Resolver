@@ -7,6 +7,16 @@ use crate::packet::{
     Packet,
 };
 
+pub fn proxy_resolve(domain_name: String) -> Packet {
+    let socket = UdpSocket::bind("0.0.0.0:4321").expect("couldn't bind udp socket to the address");
+    let response = request_server(domain_name, "1.1.1.1".to_owned(), &socket);
+    if let ResponseCode::NoErr = response.header.response_code {
+        return response;
+    }
+    eprintln!("-- 1.1.1.1 couldn't provide us the right information");
+    response
+}
+
 pub fn recursive_resolve(domain_name: String) -> Packet {
     let socket = UdpSocket::bind("0.0.0.0:4321").expect("couldn't bind udp socket to the address");
     // root servers: https://root-servers.org/
@@ -16,7 +26,7 @@ pub fn recursive_resolve(domain_name: String) -> Packet {
         let ns_server_resp = request_server(domain_name.clone(), name_server, &socket);
         return ns_server_resp;
     }
-    println!("-- root server coulndn't provide the right information");
+    eprintln!("-- root server coulndn't provide the right information");
     root_server_resp
 }
 
