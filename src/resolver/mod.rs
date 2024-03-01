@@ -37,9 +37,10 @@ pub fn recursive_resolve(domain_name: String) -> Packet {
                     return response;
                 }
                 let ns_server = response.nameserver_records[0].rdata.clone();
+                let ns_server_name = response.nameserver_records[0].name.clone();
                 println!(
-                    "-- requesting NS server: {} to resolve domain name: {}",
-                    ns_server, domain_name
+                    "-- requesting '{}' NS server: {} to resolve domain name: {}",
+                    ns_server_name, ns_server, domain_name
                 );
 
                 response = request_server(domain_name.clone(), ns_server, &socket)
