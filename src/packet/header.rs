@@ -60,8 +60,7 @@ impl Header {
         let id = 1234;
         let mut flags: u16 = 0;
         // recursion desired
-        flags = flags | (1 << 8);
-
+        // flags = flags | (1 << 8);
         let is_response: bool = Header::is_response(flags);
         let response_code: ResponseCode = Header::get_response_code(flags);
         let is_query: bool = Header::is_query(flags);

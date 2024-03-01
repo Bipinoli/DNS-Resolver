@@ -1,23 +1,33 @@
 use crate::Buffer;
 
+#[repr(u16)]
+#[derive(Debug)]
+pub enum RrType {
+    A = 1,
+    NS = 2,
+    Unknown(u16),
+}
+
 #[derive(Debug)]
 pub struct ResourceRecord {
     pub name: String,
-    pub rr_type: u16,
+    pub rr_type: RrType,
     pub class: u16,
     pub ttl: u32,
     pub rd_length: u16,
-    pub rdata: Vec<String>,
+    pub rdata: String,
 }
 
 impl ResourceRecord {
     pub fn from_buffer(buffer: &mut Buffer) -> Self {
+        let before = buffer.cursor;
         let name = Self::read_label(buffer);
-        let rr_type = buffer.read_u16();
+        // dbg!(&buffer.buf[before..buffer.cursor]);
+        let rr_type = Self::read_rrtype(buffer);
         let class = buffer.read_u16();
         let ttl = buffer.read_u32();
         let rd_length = buffer.read_u16();
-        let rdata = Self::read_rdata(rd_length, buffer);
+        let rdata = Self::read_rdata(rd_length, &rr_type, buffer);
         ResourceRecord {
             name,
             rr_type,
@@ -30,7 +40,7 @@ impl ResourceRecord {
 
     pub fn to_buffer(&self, buffer: &mut Buffer) {
         self.write_label(buffer);
-        buffer.write_u16(self.rr_type);
+        self.write_rrtype(buffer);
         buffer.write_u16(self.class);
         buffer.write_u32(self.ttl);
         buffer.write_u16(self.rd_length);
@@ -87,31 +97,52 @@ impl ResourceRecord {
         buffer.write_u8(0);
     }
 
-    fn read_rdata(rd_length: u16, buffer: &mut Buffer) -> Vec<String> {
-        // ip address has 4 nums, and there can be multiple ip addresses
-        let mut retval: Vec<String> = Vec::new();
-        let mut left_to_read = rd_length;
-        loop {
-            if left_to_read <= 0 {
-                break;
-            }
-            let mut nums: Vec<String> = Vec::new();
-            for _ in 0..4 {
-                nums.push(format!("{}", buffer.read_u8()));
-            }
-            retval.push(nums.join("."));
-            left_to_read -= 4;
+    fn read_rrtype(buffer: &mut Buffer) -> RrType {
+        match buffer.read_u16() {
+            1 => RrType::A,
+            2 => RrType::NS,
+            v => RrType::Unknown(v),
         }
-        retval
+    }
+
+    fn write_rrtype(&self, buffer: &mut Buffer) {
+        let v = match self.rr_type {
+            RrType::A => 1,
+            RrType::NS => 2,
+            RrType::Unknown(v) => v,
+        };
+        buffer.write_u16(v);
+    }
+
+    fn read_rdata(rd_length: u16, rr_type: &RrType, buffer: &mut Buffer) -> String {
+        match rr_type {
+            RrType::A => Self::read_ip(rd_length, buffer),
+            RrType::NS => Self::read_label(buffer),
+            RrType::Unknown(v) => panic!("rdata of unkonwn type: {}", v),
+        }
     }
 
     fn write_rdata(&self, buffer: &mut Buffer) {
-        for rdata in &self.rdata {
-            let splits: Vec<&str> = rdata.split(".").collect();
-            for word in splits {
-                let num: u8 = word.parse::<u8>().unwrap();
-                buffer.write_u8(num);
-            }
+        match self.rr_type {
+            RrType::A => self.write_ip(buffer),
+            RrType::NS => self.write_label(buffer),
+            RrType::Unknown(v) => panic!("rdata of unkonwn type: {}", v),
+        }
+    }
+
+    fn read_ip(length: u16, buffer: &mut Buffer) -> String {
+        let mut nums: Vec<String> = Vec::new();
+        for _ in 0..length {
+            nums.push(format!("{}", buffer.read_u8()));
+        }
+        nums.join(".")
+    }
+
+    fn write_ip(&self, buffer: &mut Buffer) {
+        let splits: Vec<&str> = self.rdata.split(".").collect();
+        for word in splits {
+            let num: u8 = word.parse::<u8>().unwrap();
+            buffer.write_u8(num);
         }
     }
 }

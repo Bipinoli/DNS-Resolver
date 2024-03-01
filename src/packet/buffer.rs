@@ -62,4 +62,20 @@ impl Buffer {
         self.write_u16((data >> 16) as u16);
         self.write_u16(data as u16);
     }
+    pub fn trim(&self) -> &[u8] {
+        &self.buf[0..self.cursor]
+    }
+    pub fn display(&self) {
+        let buf = self.trim();
+        for (index, v) in (*buf).iter().enumerate() {
+            print!("{:02x} ", v);
+            if (index + 1) % 8 == 0 {
+                print!("  ");
+            }
+            if (index + 1) % 16 == 0 {
+                println!();
+            }
+        }
+        println!();
+    }
 }
