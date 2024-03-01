@@ -8,11 +8,12 @@ I have implemented it based on the DNS protocol specified in [RFC 1035](https://
 It is by no means complete and is purely made for fun.
 
 Before starting the implementation, I skimmed over [this](https://github.com/EmilHernvall/dnsguide/tree/master) guide.
-Although the original RFC is very readable in understanding the protocol, I recommend going quickly over the guide if you have time.
+I started with his workflow of using Netcat + Hexdump to understand the DNS packets. However, later I found that Tcpdump + Wireshark works better for me.
 
 
 ## Tools used to understand the protocol:
-- Netcat
+- Official [RFC](https://datatracker.ietf.org/doc/html/rfc1035)
 - Tcpdump
 - Wireshark (to view tcpdump pcap)
+- Netcat
 
