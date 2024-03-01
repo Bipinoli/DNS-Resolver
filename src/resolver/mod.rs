@@ -18,9 +18,18 @@ pub fn proxy_resolve(domain_name: String) -> Packet {
 }
 
 pub fn recursive_resolve(domain_name: String) -> Packet {
+    //TODO:
+    // udp socket internally does DNS resolution for the NS servers
+    // change that to use the provided IPs of the NS server in additional_records if available
+    // OR do the recursive resolution for the NS server domain first
     let socket = UdpSocket::bind("0.0.0.0:4321").expect("couldn't bind udp socket to the address");
     // root servers: https://root-servers.org/
-    let mut response = request_server(domain_name.clone(), "193.0.14.129".to_owned(), &socket);
+    let root_server = "199.7.91.13";
+    println!(
+        "-- requesting root server: {} to resolve domain name: {}",
+        root_server, domain_name
+    );
+    let mut response = request_server(domain_name.clone(), root_server.to_owned(), &socket);
     loop {
         match response.header.response_code {
             ResponseCode::NoErr => {
@@ -28,6 +37,11 @@ pub fn recursive_resolve(domain_name: String) -> Packet {
                     return response;
                 }
                 let ns_server = response.nameserver_records[0].rdata.clone();
+                println!(
+                    "-- requesting NS server: {} to resolve domain name: {}",
+                    ns_server, domain_name
+                );
+
                 response = request_server(domain_name.clone(), ns_server, &socket)
             }
             _ => {
@@ -39,10 +53,6 @@ pub fn recursive_resolve(domain_name: String) -> Packet {
 }
 
 fn request_server(domain_name: String, server: String, socket: &UdpSocket) -> Packet {
-    println!(
-        "-- requesting server {} to resolve domain name: {}",
-        server, domain_name
-    );
     let request_packet = create_request(domain_name);
     let buffer = request_packet.to_buffer();
     socket

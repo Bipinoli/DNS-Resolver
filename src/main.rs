@@ -26,5 +26,8 @@ fn main() {
     }
     let domain_name = args[1].clone();
     let packet = recursive_resolve(domain_name);
+    if packet.header.is_authorotative_ans {
+        println!("-- Ip address: {}\n\n", packet.answers[0].rdata.clone());
+    }
     dbg!(&packet);
 }
