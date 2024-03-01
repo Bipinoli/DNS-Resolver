@@ -11,4 +11,8 @@ Before starting the implementation, I skimmed over [this](https://github.com/Emi
 Although the original RFC is very readable in understanding the protocol, I recommend going quickly over the guide if you have time.
 
 
+## Tools used to understand the protocol:
+- Netcat
+- Tcpdump
+- Wireshark (to view tcpdump pcap)
 
